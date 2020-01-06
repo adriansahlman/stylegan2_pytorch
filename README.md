@@ -4,7 +4,7 @@ This is an unofficial port of the StyleGAN2 architecture and training procedure 
 
 This model is built to be runnable for 1d, 2d and 3d data.
 
-**Using pre-trained networks**    
+### Using pre-trained networks
 Networks can be converted from their tensorflow version by running `run_convert_from_tf.py`. The networks have to be of type StyleGAN2, the baseline StyleGAN is not supported (config a-d). The network weights can be automatically downloaded if you specify `--download=NAME` where `NAME` is one of the following:
 
 ```
@@ -36,7 +36,7 @@ ffhq-config-e-Gskip-Dskip
 ```
 Alternatively, specify a file directly with `--input=FILE`.
 
-**Generating images**:
+### Generating images
 ```.bash
 # Train a network or convert a pretrained one.
 # Example of converting pretrained ffhq model:
@@ -59,7 +59,7 @@ python %(prog)s style_mixing_example --network=Gs.pth --row_seeds=85,100,75,458,
 ```
 The results are placed in `<RUNNING_DIR>/results/*.png`. You can change the location with `--output`. For example, `--output=~/my-stylegan2-results`.
 
-**Projecting images to latent space**:
+### Projecting images to latent space
 ```.bash
 # Train a network or convert a pretrained one.
 # Example of converting pretrained ffhq model:
@@ -72,7 +72,7 @@ python %(prog)s project_generated_images --network=Gs.pth --seeds=0,1,5
 python %(prog)s project_real_images --network=Gs.pth --data-dir=path/to/image_folder
 ```
 
-**Training and Evaluating**:
+### Training and Evaluating
 When specifying a location of your images it should be a root directory where images are located in the root directory or any subdirectories. If conditioning networks with labels, classes are interpreted as the subdirectory of the root directory that the image was loaded from.
 
 Note that a GPU with less than 16 GB memory will not be able to train on images of size 1024x1024.
