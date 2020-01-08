@@ -40,22 +40,22 @@ Alternatively, specify a file directly with `--input=FILE`.
 ```.bash
 # Train a network or convert a pretrained one.
 # Example of converting pretrained ffhq model:
-python run_convert_from_tf --download ffhq-config-f --output G.pth D.pth Gs.pth
+python run_convert_from_tf.py --download ffhq-config-f --output G.pth D.pth Gs.pth
 
 # Generate ffhq uncurated images (matches paper Figure 12)
-python %(prog)s generate_images --network=Gs.pth --seeds=6600-6625 --truncation_psi=0.5
+python run_generator.py generate_images --network=Gs.pth --seeds=6600-6625 --truncation_psi=0.5
 
 # Generate ffhq curated images (matches paper Figure 11)
-python %(prog)s generate_images --network=Gs.pth --seeds=66,230,389,1518 --truncation_psi=1.0
+python run_generator.py generate_images --network=Gs.pth --seeds=66,230,389,1518 --truncation_psi=1.0
 
 # Example of converting pretrained car model:
-python run_convert_from_tf --download car-config-f --output G_car.pth D_car.pth Gs_car.pth
+python run_convert_from_tf.py --download car-config-f --output G_car.pth D_car.pth Gs_car.pth
 
 # Generate uncurated car images (matches paper Figure 12)
-python %(prog)s generate_images --network=Gs_car.pth --seeds=6000-6025 --truncation_psi=0.5
+python run_generator.py generate_images --network=Gs_car.pth --seeds=6000-6025 --truncation_psi=0.5
 
 # Generate style mixing example (matches style mixing video clip)
-python %(prog)s style_mixing_example --network=Gs.pth --row_seeds=85,100,75,458,1500 --col_seeds=55,821,1789,293 --truncation_psi=1.0
+python run_generator.py style_mixing_example --network=Gs.pth --row_seeds=85,100,75,458,1500 --col_seeds=55,821,1789,293 --truncation_psi=1.0
 ```
 The results are placed in `<RUNNING_DIR>/results/*.png`. You can change the location with `--output`. For example, `--output=~/my-stylegan2-results`.
 
@@ -63,13 +63,13 @@ The results are placed in `<RUNNING_DIR>/results/*.png`. You can change the loca
 ```.bash
 # Train a network or convert a pretrained one.
 # Example of converting pretrained ffhq model:
-python run_convert_from_tf --download ffhq-config-f --output G.pth D.pth Gs.pth
+python run_convert_from_tf.py --download ffhq-config-f --output G.pth D.pth Gs.pth
 
 # Project generated images
-python %(prog)s project_generated_images --network=Gs.pth --seeds=0,1,5
+python run_projector.py project_generated_images --network=Gs.pth --seeds=0,1,5
 
 # Project real images
-python %(prog)s project_real_images --network=Gs.pth --data-dir=path/to/image_folder
+python run_projector.py project_real_images --network=Gs.pth --data-dir=path/to/image_folder
 ```
 
 ### Training and Evaluating
