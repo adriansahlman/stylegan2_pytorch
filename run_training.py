@@ -625,6 +625,7 @@ def get_arg_parser():
         help='Number of channels in the data. Default: 3 (RGB)',
         default=3,
         type=int,
+        choices=[1, 3],
         metavar='CHANNELS'
     )
 
@@ -723,7 +724,8 @@ def get_dataset(args):
         pixel_max=args.pixel_max,
         height=height,
         width=width,
-        resize=args.data_resize
+        resize=args.data_resize,
+        grayscale=args.data_channels == 1
     )
     assert len(dataset), 'No images found at {}'.format(args.data_dir)
     return dataset

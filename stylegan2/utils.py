@@ -241,6 +241,14 @@ class ResizeTransform:
         return tensor
 
 
+def _PIL_RGB_loader(path):
+    return Image.open(path).convert('RGB')
+
+
+def _PIL_grayscale_loader(path):
+    return Image.open(path).convert('L')
+
+
 class ImageFolder(torchvision.datasets.ImageFolder):
 
     def __init__(self,
@@ -252,8 +260,13 @@ class ImageFolder(torchvision.datasets.ImageFolder):
                  width=None,
                  resize=False,
                  resize_mode='bicubic',
+                 grayscale=False,
                  **kwargs):
-        super(ImageFolder, self).__init__(*args, **kwargs)
+        super(ImageFolder, self).__init__(
+            *args,
+            loader=_PIL_grayscale_loader if grayscale else _PIL_RGB_loader,
+            **kwargs
+        )
         transforms = []
         if mirror:
             transforms.append(torchvision.transforms.RandomHorizontalFlip())

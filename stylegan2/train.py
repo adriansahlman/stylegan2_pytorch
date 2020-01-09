@@ -707,6 +707,7 @@ class Trainer:
                         seed=None,
                         truncation_psi=None,
                         truncation_cutoff=None,
+                        label=None,
                         pixel_min=-1,
                         pixel_max=1):
         """
@@ -719,6 +720,8 @@ class Trainer:
             truncation_psi (float): See stylegan2.model.Generator.set_truncation()
                 Default value is None.
             truncation_cutoff (int): See stylegan2.model.Generator.set_truncation()
+            label (int, list, optional): Label to condition all generated images with
+                or multiple labels, one for each generated image.
             pixel_min (float): The min value in the pixel range of the generator.
                 Default value is -1.
             pixel_min (float): The max value in the pixel range of the generator.
@@ -729,10 +732,26 @@ class Trainer:
         if seed is None:
             seed = int(10000 * time.time())
         latents, latent_labels = self.prior_generator(num_images, seed=seed)
+        if label:
+            assert latent_labels is not None, 'Can not specify label when no labels ' + \
+                'are used by this model.'
+            label = utils.to_list(label)
+            assert all(isinstance(l, int) for l in label), '`label` can only consist of ' + \
+                'one or more python integers.'
+            assert len(label) == 1 or len(label) == num_images, '`label` can either ' + \
+                'specify one label to use for all images or a list of labels of the ' + \
+                'same length as number of images. Received {} labels '.format(len(label)) + \
+                'but {} images are to be generated.'.format(num_images)
+            if len(label) == 1:
+                latent_labels.fill_(label[0])
+            else:
+                latent_labels = torch.tensor(label).to(latent_labels)
         self.Gs.set_truncation(
             truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
         with torch.no_grad():
             generated = self.Gs(latents=latents, labels=latent_labels)
+        assert generated.dim() - 2 == 2, 'Can only generate images when using a ' + \
+            'network built for 2-dimensional data.'
         assert generated.dim() == 4, 'Only generators that produce 2d data ' + \
             'can be used to generate images.'
         return utils.tensor_to_PIL(generated, pixel_min=pixel_min, pixel_max=pixel_max)
@@ -757,14 +776,25 @@ class Trainer:
 
     def add_tensorboard_image_logging(self,
                                       name,
-                                      num_images,
                                       interval,
+                                      num_images,
                                       resize=256,
                                       seed=None,
                                       truncation_psi=None,
                                       truncation_cutoff=None,
+                                      label=None,
                                       pixel_min=-1,
                                       pixel_max=1):
+        """
+        Set up tensorboard logging of generated images to be performed
+        at a certain training interval. If distributed training is set up
+        and this object does not have the rank 0, no logging will be performed
+        by this object.
+        All arguments except the ones mentioned below have their description
+        in the docstring of `generate_images()` and `log_images_tensorboard()`.
+        Arguments:
+            interval (int): The interval at which to log generated images.
+        """
         if self.rank:
             return
         def callback(seen):
@@ -774,6 +804,7 @@ class Trainer:
                     seed=seed,
                     truncation_psi=truncation_psi,
                     truncation_cutoff=truncation_cutoff,
+                    label=label,
                     pixel_min=pixel_min,
                     pixel_max=pixel_max
                 )
