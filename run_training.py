@@ -24,8 +24,19 @@ def get_arg_parser():
     # Model options
 
     parser.add_argument(
+        '--channels',
+        help='Specify the channels for each layer (can be overriden for individual ' + \
+            'networks with "--g_channels" and "--d_channels". ' + \
+            'Default: %(default)s',
+        nargs='*',
+        type=int,
+        default=[32, 32, 64, 128, 256, 512, 512, 512, 512],
+        metavar='CHANNELS'
+    )
+
+    parser.add_argument(
         '--latent',
-        help='Size of the prior (noise vector). Default: 512',
+        help='Size of the prior (noise vector). Default: %(default)s',
         type=int,
         default=512,
         metavar='VALUE'
@@ -33,26 +44,16 @@ def get_arg_parser():
 
     parser.add_argument(
         '--label',
-        help='Number of unique labels. Default: 0',
+        help='Number of unique labels. Unused if not specified.',
         type=int,
         default=0,
         metavar='VALUE'
     )
 
     parser.add_argument(
-        '--channels',
-        help='Specify the channels for each layer. ' + \
-            'Default: [32, 32, 64, 128, 256, 512, 512, 512, 512]',
-        nargs='*',
-        type=int,
-        default=[32, 32, 64, 128, 256, 512, 512, 512, 512],
-        metavar='VALUE'
-    )
-
-    parser.add_argument(
         '--base_shape',
         help='Data shape of first layer in generator or ' + \
-            'last layer in discriminator. Default: (4, 4)',
+            'last layer in discriminator. Default: %(default)s',
         nargs=2,
         type=int,
         default=(4, 4),
@@ -61,23 +62,16 @@ def get_arg_parser():
 
     parser.add_argument(
         '--kernel_size',
-        help='Size of conv kernel. Default: 3',
+        help='Size of conv kernel. Default: %(default)s',
         type=int,
         default=3,
         metavar='SIZE'
     )
 
     parser.add_argument(
-        '--conv_block_size',
-        help='Number of layers in a conv block. Default: 2',
-        type=int,
-        default=2,
-        metavar='VALUE'
-    )
-
-    parser.add_argument(
         '--pad_once',
-        help='Pad filtered convs only once before filter instead of twice. Default: True',
+        help='Pad filtered convs only once before filter instead ' + \
+            'of twice. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
@@ -87,7 +81,7 @@ def get_arg_parser():
 
     parser.add_argument(
         '--pad_mode',
-        help='Padding mode for conv layers. Default: constant',
+        help='Padding mode for conv layers. Default: %(default)s',
         type=str,
         default='constant',
         metavar='MODE'
@@ -95,7 +89,8 @@ def get_arg_parser():
 
     parser.add_argument(
         '--pad_constant',
-        help='Padding constant for conv layers when `pad_mode` is \'constant\'. Default: 0',
+        help='Padding constant for conv layers when `pad_mode` is ' + \
+            '\'constant\'. Default: %(default)s',
         type=float,
         default=0,
         metavar='VALUE'
@@ -103,286 +98,359 @@ def get_arg_parser():
 
     parser.add_argument(
         '--filter_pad_mode',
-        help='Padding mode for filter layers. Default: constant',
+        help='Padding mode for filter layers. Default: %(default)s',
         type=str,
         default='constant',
+        metavar='MODE'
     )
 
     parser.add_argument(
         '--filter_pad_constant',
-        help='Padding constant for filter layers when `filter_pad_mode` is \'constant\'. Default: 0',
+        help='Padding constant for filter layers when `filter_pad_mode` ' + \
+            'is \'constant\'. Default: %(default)s',
         type=float,
         default=0,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--filter',
-        help='Filter to use whenever FIR is applied. Default: [1, 3, 3, 1]',
+        help='Filter to use whenever FIR is applied. Default: %(default)s',
         nargs='*',
         type=float,
         default=[1, 3, 3, 1],
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--weight_scale',
-        help='Use weight scaling for equalized learning rate. Default: True',
+        help='Use weight scaling for equalized learning rate. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=True
+        default=True,
+        metavar='BOOL'
     )
 
     #----------------------------------------------------------------------------
     # Generator options
 
     parser.add_argument(
+        '--g_channels',
+        help='Instead of the values of "--channels", ' + \
+            'use these for the generator instead.',
+        nargs='*',
+        type=int,
+        default=[],
+        metavar='CHANNELS'
+    )
+
+    parser.add_argument(
         '--g_skip',
-        help='Use skip connections for the generator. Default: True',
+        help='Use skip connections for the generator. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=True
+        default=True,
+        metavar='BOOL'
     )
 
     parser.add_argument(
         '--g_resnet',
-        help='Use resnet connections for the generator. Default: False',
+        help='Use resnet connections for the generator. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=False
+        default=False,
+        metavar='BOOL'
+    )
+
+    parser.add_argument(
+        '--g_conv_block_size',
+        help='Number of layers in a conv block in the generator. Default: %(default)s',
+        type=int,
+        default=2,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--g_normalize',
-        help='Normalize conv features for generator. Default: True',
+        help='Normalize conv features for generator. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=True
+        default=True,
+        metavar='BOOL'
     )
 
     parser.add_argument(
         '--g_fused_conv',
         help='Fuse conv & upsample into a transposed ' + \
-            'conv for the generator. Default: True',
+            'conv for the generator. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=True
+        default=True,
+        metavar='BOOL'
     )
 
     parser.add_argument(
         '--g_activation',
         help='The non-linear activaiton function for ' + \
-            'the generator. Default: leaky:0.2',
+            'the generator. Default: %(default)s',
         default='leaky:0.2',
-        type=str
+        type=str,
+        metavar='ACTIVATION'
     )
 
     parser.add_argument(
         '--g_conv_resample_mode',
         help='Resample mode for upsampling conv ' + \
-            'layers for generator. Default: FIR',
+            'layers for generator. Default: %(default)s',
         type=str,
         default='FIR',
+        metavar='MODE'
     )
 
     parser.add_argument(
         '--g_skip_resample_mode',
         help='Resample mode for skip connection ' + \
-            'upsamples for the generator. Default: FIR',
+            'upsamples for the generator. Default: %(default)s',
         type=str,
         default='FIR',
+        metavar='MODE'
     )
 
     parser.add_argument(
         '--g_lr',
-        help='The learning rate for the generator. Default: 2e-3',
+        help='The learning rate for the generator. Default: %(default)s',
         default=2e-3,
-        type=float
+        type=float,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--g_betas',
-        help='Beta values for the generator Adam optimizer. Default: (0, 0.99)',
+        help='Beta values for the generator Adam optimizer. Default: %(default)s',
         type=float,
         nargs=2,
-        default=[0, 0.99],
+        default=(0, 0.99),
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--g_loss',
-        help='Loss function for the generator. Default: logistic_ns',
+        help='Loss function for the generator. Default: %(default)s',
         default='logistic_ns',
         type=str,
+        metavar='LOSS'
     )
 
     parser.add_argument(
         '--g_reg',
-        help='Regularization function for the generator with an optional weight (:?). Default: pathreg:2',
+        help='Regularization function for the generator with an optional weight (:?). Default: %(default)s',
         default='pathreg:2',
         type=str,
+        metavar='REG'
     )
 
     parser.add_argument(
         '--g_reg_interval',
-        help='Interval at which to regularize the generator. Default: 4',
+        help='Interval at which to regularize the generator. Default: %(default)s',
         default=4,
         type=int,
+        metavar='INTERVAL'
     )
 
     parser.add_argument(
         '--g_iter',
-        help='Number of generator iterations per training iteration. Default: 1',
+        help='Number of generator iterations per training iteration. Default: %(default)s',
         default=1,
         type=int,
+        metavar='ITER'
     )
 
     parser.add_argument(
         '--style_mix',
         help='The probability of passing more than one ' + \
-            'latent to the generator. Default: 0.9',
+            'latent to the generator. Default: %(default)s',
         type=float,
-        default=0.9
+        default=0.9,
+        metavar='PROBABILITY'
     )
 
     parser.add_argument(
         '--latent_mapping_layers',
-        help='The number of layers of the latent mapping network. Default: 8',
+        help='The number of layers of the latent mapping network. Default: %(default)s',
         type=int,
         default=8,
+        metavar='LAYERS'
     )
 
     parser.add_argument(
         '--latent_mapping_lr_mul',
         help='The learning rate multiplier for the latent ' + \
-            'mapping network. Default: 0.01',
+            'mapping network. Default: %(default)s',
         type=float,
         default=0.01,
+        metavar='LR_MUL'
     )
 
     parser.add_argument(
         '--normalize_latent',
-        help='Normalize latent inputs. Default: True',
+        help='Normalize latent inputs. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=True
+        default=True,
+        metavar='BOOL'
     )
 
     parser.add_argument(
         '--modulate_rgb',
-        help='Modulate RGB layers. Default: True',
+        help='Modulate RGB layers (use style for output ' + \
+            'layers of generator). Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=True
+        default=True,
+        metavar='BOOL'
     )
 
     #----------------------------------------------------------------------------
     # Discriminator options
 
     parser.add_argument(
+        '--d_channels',
+        help='Instead of the values of "--channels", ' + \
+            'use these for the discriminator instead.',
+        nargs='*',
+        type=int,
+        default=[],
+        metavar='CHANNELS'
+    )
+
+    parser.add_argument(
         '--d_skip',
-        help='Use skip connections for the discriminator. Default: False',
+        help='Use skip connections for the discriminator. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=False
+        default=False,
+        metavar='BOOL'
     )
 
     parser.add_argument(
         '--d_resnet',
-        help='Use resnet connections for the discriminator. Default: True',
+        help='Use resnet connections for the discriminator. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=True
+        default=True,
+        metavar='BOOL'
+    )
+
+    parser.add_argument(
+        '--d_conv_block_size',
+        help='Number of layers in a conv block in the discriminator. Default: %(default)s',
+        type=int,
+        default=2,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--d_fused_conv',
         help='Fuse conv & downsample into a strided ' + \
-            'conv for the discriminator. Default: True',
+            'conv for the discriminator. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=True
+        default=True,
+        metavar='BOOL'
     )
 
     parser.add_argument(
         '--group_size',
-        help='Size of the groups in batch std layer. Default: 4',
+        help='Size of the groups in batch std layer. Default: %(default)s',
         type=int,
         default=4,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--d_activation',
-        help='The non-linear activaiton function for the discriminator. Default: leaky:0.2',
+        help='The non-linear activaiton function for the discriminator. Default: %(default)s',
         default='leaky:0.2',
-        type=str
+        type=str,
+        metavar='ACTIVATION'
     )
 
     parser.add_argument(
         '--d_conv_resample_mode',
         help='Resample mode for downsampling conv ' + \
-            'layers for discriminator. Default: FIR',
+            'layers for discriminator. Default: %(default)s',
         type=str,
         default='FIR',
+        metavar='MODE'
     )
 
     parser.add_argument(
         '--d_skip_resample_mode',
         help='Resample mode for skip connection ' + \
-            'downsamples for the discriminator. Default: FIR',
+            'downsamples for the discriminator. Default: %(default)s',
         type=str,
         default='FIR',
+        metavar='MODE'
     )
 
     parser.add_argument(
         '--d_loss',
-        help='Loss function for the disriminator. Default: logistic',
+        help='Loss function for the disriminator. Default: %(default)s',
         default='logistic',
         type=str,
+        metavar='LOSS'
     )
 
     parser.add_argument(
         '--d_reg',
         help='Regularization function for the discriminator ' + \
-            'with an optional weight (:?). Default: r1:10',
+            'with an optional weight (:?). Default: %(default)s',
         default='r1:10',
         type=str,
+        metavar='REG'
     )
 
     parser.add_argument(
         '--d_reg_interval',
-        help='Interval at which to regularize the discriminator. Default: 16',
+        help='Interval at which to regularize the discriminator. Default: %(default)s',
         default=16,
         type=int,
+        metavar='INTERVAL'
     )
 
     parser.add_argument(
         '--d_iter',
-        help='Number of discriminator iterations per training iteration. Default: 1',
+        help='Number of discriminator iterations per training iteration. Default: %(default)s',
         default=1,
         type=int,
+        metavar='ITER'
     )
 
     parser.add_argument(
         '--d_lr',
-        help='The learning rate for the discriminator. Default: 2e-3',
+        help='The learning rate for the discriminator. Default: %(default)s',
         default=2e-3,
-        type=float
+        type=float,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--d_betas',
-        help='Beta values for the discriminator Adam optimizer. Default: (0, 0.99)',
+        help='Beta values for the discriminator Adam optimizer. Default: %(default)s',
         type=float,
         nargs=2,
-        default=[0, 0.99],
+        default=(0, 0.99),
+        metavar='VALUE'
     )
 
     #----------------------------------------------------------------------------
@@ -390,9 +458,10 @@ def get_arg_parser():
 
     parser.add_argument(
         '--iterations',
-        help='Number of iterations to train for. Default: 1 000 000',
+        help='Number of iterations to train for. Default: %(default)s',
         type=int,
         default=1000000,
+        metavar='ITERATIONS'
     )
 
     parser.add_argument(
@@ -402,6 +471,7 @@ def get_arg_parser():
         type=int,
         default=[],
         nargs='*',
+        metavar='DEVICE_ID'
     )
 
     parser.add_argument(
@@ -410,11 +480,12 @@ def get_arg_parser():
             'start one process for each device and give it the correct ' + \
             'distributed args (rank, world_size etc). Disable this if ' + \
             'you want training to be performed with only one process ' + \
-            'using the DataParallel module. Default: True',
+            'using the DataParallel module. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=True
+        default=True,
+        metavar='BOOL'
     )
 
     parser.add_argument(
@@ -447,40 +518,45 @@ def get_arg_parser():
 
     parser.add_argument(
         '--batch_size',
-        help='Size of each batch. Default: 32',
+        help='Size of each batch. Default: %(default)s',
         default=32,
-        type=int
+        type=int,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--device_batch_size',
-        help='Maximum number of items to fit on single device at a time. Default: 4',
+        help='Maximum number of items to fit on single device at a time. Default: %(default)s',
         default=4,
-        type=int
+        type=int,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--g_reg_batch_size',
-        help='Size of each batch used to regularize the generator. Default: 16',
+        help='Size of each batch used to regularize the generator. Default: %(default)s',
         default=16,
-        type=int
+        type=int,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--g_reg_device_batch_size',
         help='Maximum number of items to fit on single device when ' + \
-            'regularizing the generator. Default: 2',
+            'regularizing the generator. Default: %(default)s',
         default=2,
-        type=int
+        type=int,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--half',
-        help='Use mixed precision training. Default: False',
+        help='Use mixed precision training. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=False
+        default=False,
+        metavar='BOOL'
     )
 
     parser.add_argument(
@@ -492,7 +568,8 @@ def get_arg_parser():
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=False
+        default=False,
+        metavar='BOOL'
     )
 
     #----------------------------------------------------------------------------
@@ -500,25 +577,28 @@ def get_arg_parser():
 
     parser.add_argument(
         '--fid_interval',
-        help='Interval of FID evaluations. Default: unused',
+        help='If specified, evaluate the FID metric with this interval.',
         default=None,
-        type=int
+        type=int,
+        metavar='INTERVAL'
     )
 
     parser.add_argument(
         '--ppl_interval',
-        help='Interval of PPL evaluations. Default: unused',
+        help='If specified, evaluate the PPL metric with this interval.',
         default=None,
-        type=int
+        type=int,
+        metavar='INTERVAL'
     )
 
     parser.add_argument(
         '--ppl_ffhq_crop',
-        help='Crop images evaluated for PPL with crop values for FFHQ. Default: False',
+        help='Crop images evaluated for PPL with crop values for FFHQ. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=False
+        default=False,
+        metavar='BOOL'
     )
 
     #----------------------------------------------------------------------------
@@ -526,23 +606,26 @@ def get_arg_parser():
 
     parser.add_argument(
         '--pixel_min',
-        help='Minimum of the value range of pixels in generated images. Default: -1',
+        help='Minimum of the value range of pixels in generated images. Default: %(default)s',
         default=-1,
-        type=float
+        type=float,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--pixel_max',
-        help='Maximum of the value range of pixels in generated images. Default: 1',
+        help='Maximum of the value range of pixels in generated images. Default: %(default)s',
         default=1,
-        type=float
+        type=float,
+        metavar='VALUE'
     )
 
     parser.add_argument(
         '--data_channels',
         help='Number of channels in the data. Default: 3 (RGB)',
         default=3,
-        type=int
+        type=int,
+        metavar='CHANNELS'
     )
 
     parser.add_argument(
@@ -553,19 +636,31 @@ def get_arg_parser():
     )
 
     parser.add_argument(
-        '--mirror_augment',
-        help='Use random horizontal flipping for data images. Default: False',
+        '--data_resize',
+        help='Resize data to fit input size of discriminator. Default: %(default)s',
         type=utils.bool_type,
         const=True,
         nargs='?',
-        default=False
+        default=False,
+        metavar='BOOL'
+    )
+
+    parser.add_argument(
+        '--mirror_augment',
+        help='Use random horizontal flipping for data images. Default: %(default)s',
+        type=utils.bool_type,
+        const=True,
+        nargs='?',
+        default=False,
+        metavar='BOOL'
     )
 
     parser.add_argument(
         '--data_workers',
-        help='Number of worker processes that handles dataloading. Default: 4',
+        help='Number of worker processes that handles dataloading. Default: %(default)s',
         default=4,
-        type=int
+        type=int,
+        metavar='WORKERS'
     )
 
     #----------------------------------------------------------------------------
@@ -573,37 +668,42 @@ def get_arg_parser():
 
     parser.add_argument(
         '--checkpoint_dir',
-        help='Save checkpoints to this directory.',
+        help='If specified, save checkpoints to this directory.',
         default=None,
-        type=str
+        type=str,
+        metavar='DIR'
     )
 
     parser.add_argument(
         '--checkpoint_interval',
-        help='Save checkpoints with this interval. Default: 10000',
+        help='Save checkpoints with this interval. Default: %(default)s',
         default=10000,
-        type=int
+        type=int,
+        metavar='INTERVAL'
     )
 
     parser.add_argument(
         '--tensorboard_log_dir',
-        help='Log to tensorboard directory.',
+        help='Log to this tensorboard directory if specified.',
         default=None,
-        type=str
+        type=str,
+        metavar='DIR'
     )
 
     parser.add_argument(
         '--tensorboard_image_interval',
-        help='Log images to tensorboard with this interval. Default: Unused',
+        help='Log images to tensorboard with this interval if specified.',
         default=None,
-        type=int
+        type=int,
+        metavar='INTERVAL'
     )
 
     parser.add_argument(
         '--tensorboard_image_size',
-        help='Size of images logged to tensorboard. Default: 256',
+        help='Size of images logged to tensorboard. Default: %(default)s',
         default=256,
-        type=int
+        type=int,
+        metavar='VALUE'
     )
 
     return parser
@@ -612,11 +712,18 @@ def get_arg_parser():
 
 def get_dataset(args):
     assert args.data_dir, '--data_dir has to be specified.'
+    height, width = [
+        shape * 2 ** (len(args.d_channels or args.channels) - 1)
+        for shape in args.base_shape
+    ]
     dataset = utils.ImageFolder(
         args.data_dir,
         mirror=args.mirror_augment,
         pixel_min=args.pixel_min,
-        pixel_max=args.pixel_max
+        pixel_max=args.pixel_max,
+        height=height,
+        width=width,
+        resize=args.data_resize
     )
     assert len(dataset), 'No images found at {}'.format(args.data_dir)
     return dataset
@@ -624,6 +731,13 @@ def get_dataset(args):
 #----------------------------------------------------------------------------
 
 def get_models(args):
+    assert len(args.g_channels or args.channels) == len(args.d_channels or args.channels), \
+        'While the number of channels for each layer can ' + \
+        'differ between generator and discriminator, the ' + \
+        'number of layers have to be the same. Received ' + \
+        '{} generator layers and {} discriminator layers.'.format(
+            len(args.g_channels or args.channels), len(args.d_channels or args.channels))
+
     G_M = stylegan2.models.GeneratorMapping(
         latent_size=args.latent,
         label_size=args.label,
@@ -638,7 +752,6 @@ def get_models(args):
     common_kwargs = dict(
         data_channels=args.data_channels,
         base_shape=args.base_shape,
-        channels=args.channels,
         conv_filter=args.filter,
         skip_filter=args.filter,
         kernel_size=args.kernel_size,
@@ -647,14 +760,15 @@ def get_models(args):
         filter_pad_mode=args.filter_pad_mode,
         filter_pad_constant=args.filter_pad_constant,
         pad_once=args.pad_once,
-        conv_block_size=args.conv_block_size,
         weight_scale=args.weight_scale
     )
 
     G_S = stylegan2.models.GeneratorSynthesis(
+        channels=args.g_channels or args.channels,
         latent_size=args.latent,
         demodulate=args.g_normalize,
         modulate_data_out=args.modulate_rgb,
+        conv_block_size=args.g_conv_block_size,
         activation=args.g_activation,
         conv_resample_mode=args.g_conv_resample_mode,
         skip_resample_mode=args.g_skip_resample_mode,
@@ -667,7 +781,9 @@ def get_models(args):
     G = stylegan2.models.Generator(G_mapping=G_M, G_synthesis=G_S)
 
     D = stylegan2.models.Discriminator(
+        channels=args.d_channels or args.channels,
         label_size=args.label,
+        conv_block_size=args.d_conv_block_size,
         activation=args.d_activation,
         conv_resample_mode=args.d_conv_resample_mode,
         skip_resample_mode=args.d_skip_resample_mode,

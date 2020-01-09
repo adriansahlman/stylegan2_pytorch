@@ -9,6 +9,7 @@ from PIL import Image
 import numpy as np
 import torch
 from torch import nn
+from torch.nn import functional as F
 import torchvision
 try:
     import tqdm
@@ -208,9 +209,50 @@ def range_type(s):
 # Dataset and generation of latents
 
 
+class ResizeTransform:
+
+    def __init__(self, height, width, resize=True, mode='bicubic'):
+        if resize:
+            assert height and width, 'Height and width have to be given ' + \
+                'when resizing data.'
+        self.height = height
+        self.width = width
+        self.resize = resize
+        self.mode = mode
+
+    def __call__(self, tensor):
+        if self.height and self.width:
+            if tensor.size(1) != self.height or tensor.size(2) != self.width:
+                if self.resize:
+                    kwargs = {}
+                    if 'cubic' in self.mode or 'linear' in self.mode:
+                        kwargs.update(align_corners=False)
+                    tensor = F.interpolate(
+                        tensor.unsqueeze(0),
+                        size=(self.height, self.width),
+                        mode=self.mode,
+                        **kwargs
+                    ).squeeze(0)
+                else:
+                    raise ValueError(
+                        'Data shape incorrect, expected ({},{}) '.format(self.width, self.height) + \
+                        'but got ({},{}) (width, height)'.format(tensor.size(2), tensor.size(1))
+                    )
+        return tensor
+
+
 class ImageFolder(torchvision.datasets.ImageFolder):
 
-    def __init__(self, *args, mirror=False, pixel_min=-1, pixel_max=1, **kwargs):
+    def __init__(self,
+                 *args,
+                 mirror=False,
+                 pixel_min=-1,
+                 pixel_max=1,
+                 height=None,
+                 width=None,
+                 resize=False,
+                 resize_mode='bicubic',
+                 **kwargs):
         super(ImageFolder, self).__init__(*args, **kwargs)
         transforms = []
         if mirror:
@@ -222,6 +264,8 @@ class ImageFolder(torchvision.datasets.ImageFolder):
                 std=[1. / (pixel_max - pixel_min)]
             )
         )
+        transforms.append(ResizeTransform(
+            height=height, width=width, resize=resize, mode=resize_mode))
         self.transform = torchvision.transforms.Compose(transforms)
 
     def _find_classes(self, *args, **kwargs):
