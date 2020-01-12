@@ -97,7 +97,6 @@ Metrics will be appended to the file `metrics.json` if it exists. Identical metr
 ### Missing features
 + Precision-Recall metric
 + Multi-GPU evaluation of metrics during training
-If you think of any good features that you feel are missing, please open an issue!
 
 ### Code information
 Base functionality is tested but there might be settings that raise exceptions as the repository contains a couple thousand lines of code. If you find one, please open an issue or pull request.
