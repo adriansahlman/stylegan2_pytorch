@@ -618,7 +618,7 @@ class ProgressWriter:
         return next(self.rnge)
 
     def close(self):
-        if hasattr(self._writer, 'close'):
+        if hasattr(self._writer, 'close') and self._writer != sys.stdout:
             self._writer.close()
         if hasattr(self._progress_bar, 'close'):
             self._progress_bar.close()
