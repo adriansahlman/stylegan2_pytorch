@@ -618,8 +618,14 @@ class ProgressWriter:
         return next(self.rnge)
 
     def close(self):
-        if hasattr(self._writer, 'close') and self._writer != sys.stdout:
-            self._writer.close()
+        if hasattr(self._writer, 'close'):
+            can_close = True
+            try:
+                can_close = self._writer != sys.stdout and self._writer != sys.stderr
+            except AttributeError:
+                pass
+            if can_close:
+                self._writer.close()
         if hasattr(self._progress_bar, 'close'):
             self._progress_bar.close()
 
