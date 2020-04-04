@@ -343,6 +343,8 @@ def main():
         os.makedirs(args.output)
 
     G = stylegan2.models.load(args.network)
+    G.eval()
+
     assert isinstance(G, stylegan2.models.Generator), 'Model type has to be ' + \
         'stylegan2.models.Generator. Found {}.'.format(type(G))
 
