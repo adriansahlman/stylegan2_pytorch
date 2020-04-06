@@ -1,0 +1,9 @@
+numpy
+pillow
+pyyaml
+requests
+scipy
+tensorboard
+torch
+torchvision
+tqdm
