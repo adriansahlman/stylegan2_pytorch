@@ -1423,7 +1423,7 @@ class GeneratorConvBlock(nn.Module):
             output (torch.Tensor)
         """
         if latents.dim() == 2:
-            latent.unsqueeze(1)
+            latents.unsqueeze(1)
         if latents.size(1) == 1:
             latents = latents.repeat(1, len(self), 1)
         assert latents.size(1) == len(self), \
