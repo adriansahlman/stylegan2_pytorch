@@ -28,7 +28,7 @@ def get_activation(activation):
         slope = ''.join(
             char for char in activation if char.isdigit() or char == '.')
         slope = float(slope) if slope else 0.01
-        return nn.LeakyReLU(slope), np.sqrt(2) # close enough to true gain
+        return nn.LeakyReLU(slope), np.sqrt(2)  # close enough to true gain
     elif activation.startswith('swish'):
         return Swish(affine=activation != 'swish'), np.sqrt(2)
     elif activation in ['relu']:
@@ -44,7 +44,7 @@ def get_activation(activation):
     elif activation in ['softplus']:
         return nn.Softplus(), 1
     elif activation in ['softsign']:
-        return nn.Softsign(), 1 # unsure about this gain
+        return nn.Softsign(), 1  # unsure about this gain
     elif activation in ['sigmoid', 'logistic']:
         return nn.Sigmoid(), 1.
     elif activation in ['tanh']:
@@ -222,7 +222,6 @@ def _get_layer(layer_class, kwargs, wrap=False, noise=False):
             layer = NoiseInjectionWrapper(layer)
         layer = BiasActivationWrapper(layer, **kwargs)
     return layer
-
 
 
 class BiasActivationWrapper(nn.Module):
@@ -428,8 +427,7 @@ class NoiseInjectionWrapper(nn.Module):
         noise_shape[1] = 1
         if self.same_over_batch:
             noise_shape[0] = 1
-        if self.noise_storage is None \
-        or list(self.noise_storage.size()) != noise_shape:
+        if self.noise_storage is None or list(self.noise_storage.size()) != noise_shape:
             if not self._fixed_noise:
                 self.noise_storage = torch.empty(
                     *noise_shape,
@@ -497,7 +495,6 @@ class FilterLayer(nn.Module):
             self.padding = [pad0, pad1] * dim
             self.pad_mode = pad_mode
             self.pad_constant = pad_constant
-
 
     def forward(self, input, **kwargs):
         """
@@ -1190,8 +1187,7 @@ class ConvDownLayer(ConvLayer):
             pad = self.kernel_size - 2
             pad0 = pad // 2
             pad1 = pad - pad0
-            if pad0 == pad1 and \
-            (pad0 == 0 or self.pad_mode == 'constant' and self.pad_constant == 0):
+            if pad0 == pad1 and (pad0 == 0 or self.pad_mode == 'constant' and self.pad_constant == 0):
                 self.fused_pad = True
                 self.padding = pad0
             else:

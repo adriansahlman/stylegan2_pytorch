@@ -849,25 +849,25 @@ class GeneratorSynthesis(_BaseAdverserialModel):
         for i in range(1, len(self.channels) + 1):
             to_data = None
             if i == len(self.channels) or self.skip:
-                    to_data = modules.BiasActivationWrapper(
-                        layer=modules.ConvLayer(
-                            **{
-                                **conv_block_kwargs,
-                                'in_channels': self.channels[-i],
-                                'out_channels': self.data_channels,
-                                'modulate': self.modulate_data_out,
-                                'demodulate': False,
-                                'kernel_size': 1
-                            }
-                        ),
+                to_data = modules.BiasActivationWrapper(
+                    layer=modules.ConvLayer(
                         **{
                             **conv_block_kwargs,
-                            'features': self.data_channels,
-                            'use_bias': True,
-                            'activation': 'linear',
-                            'bias_init': 0
+                            'in_channels': self.channels[-i],
+                            'out_channels': self.data_channels,
+                            'modulate': self.modulate_data_out,
+                            'demodulate': False,
+                            'kernel_size': 1
                         }
-                    )
+                    ),
+                    **{
+                        **conv_block_kwargs,
+                        'features': self.data_channels,
+                        'use_bias': True,
+                        'activation': 'linear',
+                        'bias_init': 0
+                    }
+                )
             self.to_data_layers.append(to_data)
 
         # When the skip architecture is used we need to
@@ -887,8 +887,7 @@ class GeneratorSynthesis(_BaseAdverserialModel):
 
         # Calculate the number of latents required
         # in the input.
-        self._num_latents = 1 + self.conv_block_size \
-                            * (len(self.channels) - 1)
+        self._num_latents = 1 + self.conv_block_size * (len(self.channels) - 1)
         # Only the final data output layer uses
         # its own latent input when being modulated.
         # The other data output layers recycles latents
@@ -1211,8 +1210,8 @@ class Discriminator(_BaseAdverserialModel):
             # perform this operation as a way to create inputs for
             # the first block.
             if from_data is not None:
-               t = from_data(y)
-               x = t if x is None else x + t
+                t = from_data(y)
+                x = t if x is None else x + t
 
             x = block(input=x)
 

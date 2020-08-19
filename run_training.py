@@ -136,6 +136,14 @@ def get_arg_parser():
     # Generator options
 
     parser.add_argument(
+        '--g_file',
+        help='Load a generator model from a file instead of constructing a new one. Disabled unless a file is specified.',
+        type=str,
+        default=None,
+        metavar='FILE'
+    )
+
+    parser.add_argument(
         '--g_channels',
         help='Instead of the values of "--channels", ' + \
             'use these for the generator instead.',
@@ -319,6 +327,14 @@ def get_arg_parser():
 
     #----------------------------------------------------------------------------
     # Discriminator options
+
+    parser.add_argument(
+        '--d_file',
+        help='Load a discriminator model from a file instead of constructing a new one. Disabled unless a file is specified.',
+        type=str,
+        default=None,
+        metavar='FILE'
+    )
 
     parser.add_argument(
         '--d_channels',
@@ -733,24 +749,6 @@ def get_dataset(args):
 #----------------------------------------------------------------------------
 
 def get_models(args):
-    assert len(args.g_channels or args.channels) == len(args.d_channels or args.channels), \
-        'While the number of channels for each layer can ' + \
-        'differ between generator and discriminator, the ' + \
-        'number of layers have to be the same. Received ' + \
-        '{} generator layers and {} discriminator layers.'.format(
-            len(args.g_channels or args.channels), len(args.d_channels or args.channels))
-
-    G_M = stylegan2.models.GeneratorMapping(
-        latent_size=args.latent,
-        label_size=args.label,
-        num_layers=args.latent_mapping_layers,
-        hidden=args.latent,
-        activation=args.g_activation,
-        normalize_input=args.normalize_latent,
-        lr_mul=args.latent_mapping_lr_mul,
-        weight_scale=args.weight_scale
-    )
-
     common_kwargs = dict(
         data_channels=args.data_channels,
         base_shape=args.base_shape,
@@ -765,36 +763,65 @@ def get_models(args):
         weight_scale=args.weight_scale
     )
 
-    G_S = stylegan2.models.GeneratorSynthesis(
-        channels=args.g_channels or args.channels,
-        latent_size=args.latent,
-        demodulate=args.g_normalize,
-        modulate_data_out=args.modulate_rgb,
-        conv_block_size=args.g_conv_block_size,
-        activation=args.g_activation,
-        conv_resample_mode=args.g_conv_resample_mode,
-        skip_resample_mode=args.g_skip_resample_mode,
-        resnet=args.g_resnet,
-        skip=args.g_skip,
-        fused_resample=args.g_fused_conv,
-        **common_kwargs
-    )
+    if args.g_file:
+        G = stylegan2.models.load(args.g_file)
+        assert isinstance(G, stylegan2.models.Generator), \
+                '`--g_file` should specify a generator model, found {}'.format(type(G))
+    else:
 
-    G = stylegan2.models.Generator(G_mapping=G_M, G_synthesis=G_S)
+        G_M = stylegan2.models.GeneratorMapping(
+            latent_size=args.latent,
+            label_size=args.label,
+            num_layers=args.latent_mapping_layers,
+            hidden=args.latent,
+            activation=args.g_activation,
+            normalize_input=args.normalize_latent,
+            lr_mul=args.latent_mapping_lr_mul,
+            weight_scale=args.weight_scale
+        )
 
-    D = stylegan2.models.Discriminator(
-        channels=args.d_channels or args.channels,
-        label_size=args.label,
-        conv_block_size=args.d_conv_block_size,
-        activation=args.d_activation,
-        conv_resample_mode=args.d_conv_resample_mode,
-        skip_resample_mode=args.d_skip_resample_mode,
-        mbstd_group_size=args.group_size,
-        resnet=args.d_resnet,
-        skip=args.d_skip,
-        fused_resample=args.d_fused_conv,
-        **common_kwargs
-    )
+        G_S = stylegan2.models.GeneratorSynthesis(
+            channels=args.g_channels or args.channels,
+            latent_size=args.latent,
+            demodulate=args.g_normalize,
+            modulate_data_out=args.modulate_rgb,
+            conv_block_size=args.g_conv_block_size,
+            activation=args.g_activation,
+            conv_resample_mode=args.g_conv_resample_mode,
+            skip_resample_mode=args.g_skip_resample_mode,
+            resnet=args.g_resnet,
+            skip=args.g_skip,
+            fused_resample=args.g_fused_conv,
+            **common_kwargs
+        )
+
+        G = stylegan2.models.Generator(G_mapping=G_M, G_synthesis=G_S)
+
+    if args.d_file:
+        D = stylegan2.models.load(args.d_file)
+        assert isinstance(D, stylegan2.models.Discriminator), \
+                '`--d_file` should specify a discriminator model, found {}'.format(type(D))
+    else:
+        D = stylegan2.models.Discriminator(
+            channels=args.d_channels or args.channels,
+            label_size=args.label,
+            conv_block_size=args.d_conv_block_size,
+            activation=args.d_activation,
+            conv_resample_mode=args.d_conv_resample_mode,
+            skip_resample_mode=args.d_skip_resample_mode,
+            mbstd_group_size=args.group_size,
+            resnet=args.d_resnet,
+            skip=args.d_skip,
+            fused_resample=args.d_fused_conv,
+            **common_kwargs
+        )
+    assert len(G.G_synthesis.channels) == len(D.channels), \
+        'While the number of channels for each layer can ' + \
+        'differ between generator and discriminator, the ' + \
+        'number of layers have to be the same. Received ' + \
+        '{} generator layers and {} discriminator layers.'.format(
+            len(G.G_synthesis.channels), len(D.channels))
+
     return G, D
 
 #----------------------------------------------------------------------------
