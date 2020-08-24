@@ -459,7 +459,7 @@ class Trainer:
                 scaled_loss.backward()
         else:
             loss.backward()
-        #use loss item?
+        #get the scalar only
         return loss.item() * (self.world_size or 1)
 
     def train(self, iterations, callbacks=None, verbose=True):
