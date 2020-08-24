@@ -459,7 +459,8 @@ class Trainer:
                 scaled_loss.backward()
         else:
             loss.backward()
-        return loss * (self.world_size or 1)
+        #use loss item?
+        return loss.item() * (self.world_size or 1)
 
     def train(self, iterations, callbacks=None, verbose=True):
         """
@@ -571,7 +572,8 @@ class Trainer:
                         real_labels=real_labels
                     )
                     D_loss += self._backward(loss, self.D_opt)
-                    D_loss += loss
+#                     D_loss += loss
+                    D_loss += loss.item()
 
                 if D_reg:
                     if self.D_reg_interval:
@@ -661,7 +663,9 @@ class Trainer:
                 callback(self.seen)
 
             self.seen += 1
-
+            
+            # clear cache
+            torch.cuda.empty_cache()
             # Handle checkpointing
             if not self.rank and self.checkpoint_dir and self.checkpoint_interval:
                 if self.seen % self.checkpoint_interval == 0:
