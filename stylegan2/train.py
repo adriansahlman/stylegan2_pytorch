@@ -572,8 +572,6 @@ class Trainer:
                         real_labels=real_labels
                     )
                     D_loss += self._backward(loss, self.D_opt)
-#                     D_loss += loss
-                    D_loss += loss.item()
 
                 if D_reg:
                     if self.D_reg_interval:
