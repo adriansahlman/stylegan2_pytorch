@@ -69,7 +69,7 @@ def convert_kwargs(static_kwargs, kwargs_mapping):
     return kwargs
 
 
-_PERMITTED_MODELS = ['G_main', 'G_mapping', 'G_synthesis_stylegan2', 'D_stylegan2']
+_PERMITTED_MODELS = ['G_main', 'G_mapping', 'G_synthesis_stylegan2', 'D_stylegan2', 'D_main', 'G_synthesis']
 def convert_from_tf(tf_state):
     tf_state = utils.AttributeDict.convert_dict_recursive(tf_state)
     model_type = tf_state.build_func_name
@@ -136,7 +136,7 @@ def convert_from_tf(tf_state):
                 G_mapping.embedding.weight.data.copy_(torch.from_numpy(var))
         return G_mapping
 
-    if model_type == 'G_synthesis_stylegan2':
+    if model_type == 'G_synthesis_stylegan2' or model_type == 'G_synthesis':
         assert tf_state.static_kwargs.get('fused_modconv', True), \
             'Can not load TF networks that use `fused_modconv=False`'
         noise_tensors = []
@@ -230,7 +230,7 @@ def convert_from_tf(tf_state):
             G_synthesis.static_noise(noise_tensors=noise_tensors)
         return G_synthesis
 
-    if model_type == 'D_stylegan2':
+    if model_type == 'D_stylegan2' or model_type == 'D_main':
         output_vars = {}
         conv_vars = {}
         for var_name, var in tf_state.variables:
