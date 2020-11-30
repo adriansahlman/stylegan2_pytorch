@@ -34,7 +34,7 @@ import torchvision
 class LPIPS_VGG16(nn.Module):
     _FEATURE_IDX = [0, 4, 9, 16, 23, 30]
     _LINEAR_WEIGHTS_URL = 'https://github.com/richzhang/PerceptualSimilarity' + \
-                          '/blob/master/models/weights/v0.1/vgg.pth?raw=true'
+                          '/blob/master/lpips/weights/v0.1/vgg.pth?raw=true'
 
     def __init__(self, pixel_min=-1, pixel_max=1):
         super(LPIPS_VGG16, self).__init__()
